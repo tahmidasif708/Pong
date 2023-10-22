@@ -40,10 +40,10 @@ int winner = -1;
 int paddle1_score, paddle2_score = 0;
 
 void print_score() {
-    cout << "\n````````````````````````````````\n";
+    cout << "\n```````````````````````````````````\n";
     cout << "\t\t Paddle 1: " << paddle1_score << "\t";
     cout << "Paddle 2: " << paddle2_score << "\n";
-    cout << "````````````````````````````````\n\n";
+    cout << "```````````````````````````````````\n\n";
 }
 
 glm::mat4 view_matrix, m_projection_matrix;
@@ -160,6 +160,7 @@ void process_input() {
                         break;
                     case SDLK_t:
                         onePlayerMode = !onePlayerMode;
+                        CPU = false;
                         break;
                 }
                 break;
@@ -194,9 +195,15 @@ void process_input() {
         }
     } else {
         if (ball_pos.y > paddle1_pos.y) {
-            paddle1_move.y = 1.0f;
+            if (!ceiling(paddle1_pos, paddle_height, 3.7f)) {
+                paddle1_move.y = 1.0f;
+            }
         } else if (ball_pos.y < paddle1_pos.y) {
-            paddle1_move.y = -1.0f;
+            if (!floor(paddle1_pos, paddle_height, -3.7f)) {
+                paddle1_move.y = -1.0f;
+            }
+        } else {
+            paddle1_move.y = 0.0f;  // Stop paddle1 if it's at the same height as the ball
         }
     }
     // paddle_2
@@ -272,7 +279,7 @@ bool ball_on_walls(glm::vec3 ball_pos) {
         }
         
         cout << "\n````````````````````````````````\n";
-        cout << "\t\tCurrent Scores: \n";
+        cout << "\t\tCurrent Score: \n";
         print_score();
         
         return true;
@@ -284,7 +291,7 @@ bool ball_on_walls(glm::vec3 ball_pos) {
             g_game_is_running = false;
         }
         cout << "\n````````````````````````````````\n";
-        cout << "\t\tCurrent Scores: \n";
+        cout << "\t\tCurrent Score: \n";
         print_score();
         
         return true;
@@ -341,10 +348,10 @@ void render() {
 
 void shutdown() {
     cout << "\n================================\n";
-    cout << "\t\t Player " << winner << " wins!\n";
-    cout << "\t\t Final Scores:\n";
+    cout << "\t\t Paddle " << winner << " wins!\n";
+    cout << "\t\t Final Score:\n";
     print_score();
-    cout << " Thanks for playing, game over!\n";
+    cout << " Game over!\n";
     cout << "================================\n\n";
     SDL_Quit();
 }

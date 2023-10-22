@@ -36,7 +36,7 @@ const char V_SHADER_PATH[] = "shaders/vertex_textured.glsl",
            F_SHADER_PATH[] = "shaders/fragment_textured.glsl";
 
 bool g_game_is_running = true;
-int winner = 1;
+int winner = -1;
 int paddle1_score, paddle2_score = 0;
 
 void print_score() {
@@ -145,6 +145,8 @@ bool floor(glm::vec3 position, float height, float bottom) {
     return !((position.y - (height / 2.0f)) > bottom);
 }
 
+bool onePlayerMode = false;
+
 void process_input() {
     paddle1_move = glm::vec3(0); // so that if nothing is pressed, we don't go anywhere
     paddle2_move = glm::vec3(0);
@@ -165,6 +167,9 @@ void process_input() {
                         break;
                     case SDLK_SPACE:
                         break;
+                    case SDLK_t:
+                        onePlayerMode = !onePlayerMode;
+                        break;
                 }
                 break; // SDL_KEYDOWN
         }
@@ -183,17 +188,18 @@ void process_input() {
         ball_move = glm::normalize(ball_move);
     }
     
-    // paddle_1
-    if ((keys[SDL_SCANCODE_W]) && !ceiling(paddle1_pos, paddle_height, 3.7f)) {
-        paddle1_move.y = 1.0f;
+    if (!onePlayerMode) {
+        // paddle_1
+        if ((keys[SDL_SCANCODE_W]) && !ceiling(paddle1_pos, paddle_height, 3.7f)) {
+            paddle1_move.y = 1.0f;
+        }
+        else if ((keys[SDL_SCANCODE_S]) && !floor(paddle1_pos, paddle_height, -3.7f)) {
+            paddle1_move.y = -1.0f;
+        }
+        if (glm::length(paddle1_move) > 1.0f) {
+            paddle1_move = glm::normalize(paddle1_move);
+        }
     }
-    else if ((keys[SDL_SCANCODE_S]) && !floor(paddle1_pos, paddle_height, -3.7f)) {
-        paddle1_move.y = -1.0f;
-    }
-    if (glm::length(paddle1_move) > 1.0f) {
-        paddle1_move = glm::normalize(paddle1_move);
-    }
-    
     // paddle_2
     if ((keys[SDL_SCANCODE_UP]) && !ceiling(paddle2_pos, paddle_height, 3.7f)) {
         paddle2_move.y = 1.0f;
@@ -272,8 +278,10 @@ bool ball_on_walls(glm::vec3 ball_pos) {
     
     if (ball_pos.x > right) {
         paddle1_score += 1;
-        if (paddle1_score == 3)
+        if (paddle1_score == 3){
             winner = 1;
+            g_game_is_running = false;
+        }
         
         cout << "\n````````````````````````````````\n";
         cout << "\t\tCurrent Scores: \n";
@@ -283,9 +291,10 @@ bool ball_on_walls(glm::vec3 ball_pos) {
     }
     else if (ball_pos.x < left) {
         paddle2_score += 1;
-        if (paddle1_score == 3)
+        if (paddle2_score == 3) {
             winner = 2;
-        
+            g_game_is_running = false;
+        }
         cout << "\n````````````````````````````````\n";
         cout << "\t\tCurrent Scores: \n";
         print_score();

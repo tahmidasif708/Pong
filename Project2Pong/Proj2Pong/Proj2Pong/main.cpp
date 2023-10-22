@@ -46,12 +46,9 @@ void print_score() {
     cout << "````````````````````````````````\n\n";
 }
 
-// ------------------- INITIALIZATION OF ONSCREEN ITEMS -------------------
-// Initialize Matricies for paddles + ball
 glm::mat4 view_matrix, m_projection_matrix;
 glm::mat4 m_model_matrix_paddle1, m_model_matrix_paddle2, m_model_matrix_ball;
 
-// Ball Initalization
 glm::vec3 ball_pos = glm::vec3(0, 0, 0);
 glm::vec3 ball_move = glm::vec3(0, 0, 0);
 glm::vec3 ball_scale = glm::vec3(0.35f, 0.35f, 1.0f);
@@ -62,24 +59,18 @@ float ball_speed = 4.5f;
 float ball_rotate = 1.0f;
 bool ball_path_reversed = false;
 
-// Paddle 1 Initalization
 glm::vec3 paddle1_pos = glm::vec3(-4.75, 0, 0);
 glm::vec3 paddle1_move = glm::vec3(0, 0, 0);
 float paddle1_speed = 3.85f;
 
-// Paddle 2 Initalization
 glm::vec3 paddle2_pos = glm::vec3(4.75, 0, 0);
 glm::vec3 paddle2_move = glm::vec3(0, 0, 0);
 float paddle2_speed = 3.85f;
 
-// Both Paddles
 glm::vec3 paddle_scale = glm::vec3(0.35f, 2.55f, 1.0f);
 float paddle_height = 1.0f * paddle_scale.y;
 float paddle_width = 1.0f * paddle_scale.x;
 
-// ------------------ /INITIALIZATION OF ONSCREEN ITEMS -------------------
-
-// ------------------------------- TEXTURES -------------------------------
 GLuint paddleTextureID;
 GLuint ballTextureID;
 
@@ -103,7 +94,6 @@ GLuint load_texture(const char* filePath) {
     
     return textureID;
 }
-// ------------------------------ /TEXTURES -------------------------------
 
 void initialise() {
     SDL_Init(SDL_INIT_VIDEO);
@@ -126,7 +116,7 @@ void initialise() {
     g_shader_program.set_projection_matrix(m_projection_matrix);
     g_shader_program.set_view_matrix(view_matrix);
     
-    glUseProgram(g_shader_program.get_program_id()); //is it get_program_id or m_program_id
+    glUseProgram(g_shader_program.get_program_id());
     
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     
@@ -148,7 +138,7 @@ bool floor(glm::vec3 position, float height, float bottom) {
 bool onePlayerMode = false;
 
 void process_input() {
-    paddle1_move = glm::vec3(0); // so that if nothing is pressed, we don't go anywhere
+    paddle1_move = glm::vec3(0);
     paddle2_move = glm::vec3(0);
     
     SDL_Event event;
@@ -171,7 +161,7 @@ void process_input() {
                         onePlayerMode = !onePlayerMode;
                         break;
                 }
-                break; // SDL_KEYDOWN
+                break;
         }
     }
     
@@ -179,8 +169,8 @@ void process_input() {
     
     // ball
     if (keys[SDL_SCANCODE_SPACE]) {
-        srand(time(0));                     // random seed
-        int slope = (rand() % 3) - 1;       // spice up the initial throw so it's not the same every time
+        srand(time(0));
+        int slope = (rand() % 3) - 1;
         ball_move.x = 1.0f * slope;
         ball_move.y = 1.0f * slope;
     }
@@ -233,43 +223,32 @@ bool colliding(glm::vec3 ball_pos, glm::vec3 p_position) {
 }
 
 void update_ball(float deltaTime) {
-    // ---------------------------- ball ----------------------------
     m_model_matrix_ball = glm::mat4(1.0f);
     
     if ((ceiling(ball_pos, ball_height, 3.7f) || floor(ball_pos, ball_height, -3.7f))) {
-//        cout << "Touching a wall!\n";
         ball_move.y *= -1.0f;
     }
     else if ((colliding(ball_pos, paddle1_pos)) || (colliding(ball_pos, paddle2_pos))) {
-//        cout << "Touching a paddle! \n";
-//        cout << "Ball: (" << ball_pos.x << ", " << ball_pos.y << ") \n";
-//        cout << "Pad1: (" << paddle1_pos.x << ", " << paddle1_pos.y << ") \n";
-//        cout << "Pad2: (" << paddle2_pos.x << ", " << paddle2_pos.y << ") \n\n";
         ball_move.x *= -1.0f;
     }
     
     ball_pos += ball_move * ball_speed * deltaTime;
     m_model_matrix_ball = glm::translate(m_model_matrix_ball, ball_pos);
     m_model_matrix_ball = glm::scale(m_model_matrix_ball, ball_scale);
-    // --------------------------- /ball ----------------------------
 }
 
 void update_paddle1(float deltaTime) {
-    // ---------------------------- pad1 ----------------------------
     paddle1_pos += paddle1_move * paddle1_speed * deltaTime;
     m_model_matrix_paddle1 = glm::mat4(1.0f);
     m_model_matrix_paddle1 = glm::translate(m_model_matrix_paddle1, paddle1_pos);
     m_model_matrix_paddle1 = glm::scale(m_model_matrix_paddle1, paddle_scale);
-    // --------------------------- /pad1 ----------------------------
 }
 
 void update_paddle2(float deltaTime) {
-    // ---------------------------- pad2 ----------------------------
     paddle2_pos += paddle2_move * paddle2_speed * deltaTime;
     m_model_matrix_paddle2 = glm::mat4(1.0f);
     m_model_matrix_paddle2 = glm::translate(m_model_matrix_paddle2, paddle2_pos);
     m_model_matrix_paddle2 = glm::scale(m_model_matrix_paddle2, paddle_scale);
-    // --------------------------- /pad2 ----------------------------
 }
 
 bool ball_on_walls(glm::vec3 ball_pos) {
@@ -323,7 +302,7 @@ void update() {
     update_paddle2(deltaTime);
 }
 
-void render_object(glm::mat4 m_model_matrix, GLuint textureID) { //modelMatrix or  m_model_matrix_ball?
+void render_object(glm::mat4 m_model_matrix, GLuint textureID) {
     float vertices[] = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
     float texture_coordinates[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
     

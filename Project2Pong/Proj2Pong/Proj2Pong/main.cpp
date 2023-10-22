@@ -41,8 +41,8 @@ int paddle1_score, paddle2_score = 0;
 
 void print_score() {
     cout << "\n````````````````````````````````\n";
-    cout << "\t\t P1: " << paddle1_score << "\t";
-    cout << "P2: " << paddle2_score << "\n";
+    cout << "\t\t Paddle 1: " << paddle1_score << "\t";
+    cout << "Paddle 2: " << paddle2_score << "\n";
     cout << "````````````````````````````````\n\n";
 }
 
@@ -136,6 +136,7 @@ bool floor(glm::vec3 position, float height, float bottom) {
 }
 
 bool onePlayerMode = false;
+bool CPU = false;
 
 void process_input() {
     paddle1_move = glm::vec3(0);
@@ -179,15 +180,23 @@ void process_input() {
     }
     
     if (!onePlayerMode) {
-        // paddle_1
-        if ((keys[SDL_SCANCODE_W]) && !ceiling(paddle1_pos, paddle_height, 3.7f)) {
+        if (!CPU) {
+            // paddle_1
+            if ((keys[SDL_SCANCODE_W]) && !ceiling(paddle1_pos, paddle_height, 3.7f)) {
+                paddle1_move.y = 1.0f;
+            }
+            else if ((keys[SDL_SCANCODE_S]) && !floor(paddle1_pos, paddle_height, -3.7f)) {
+                paddle1_move.y = -1.0f;
+            }
+            if (glm::length(paddle1_move) > 1.0f) {
+                paddle1_move = glm::normalize(paddle1_move);
+            }
+        }
+    } else {
+        if (ball_pos.y > paddle1_pos.y) {
             paddle1_move.y = 1.0f;
-        }
-        else if ((keys[SDL_SCANCODE_S]) && !floor(paddle1_pos, paddle_height, -3.7f)) {
+        } else if (ball_pos.y < paddle1_pos.y) {
             paddle1_move.y = -1.0f;
-        }
-        if (glm::length(paddle1_move) > 1.0f) {
-            paddle1_move = glm::normalize(paddle1_move);
         }
     }
     // paddle_2
